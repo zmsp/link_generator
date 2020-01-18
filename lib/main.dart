@@ -4,6 +4,30 @@ import 'package:share/share.dart';
 import "package:flutter/services.dart";
 import "package:toast/toast.dart";
 
+///DEBUG CODE
+//import 'package:device_preview/device_preview.dart';
+//void main() => runApp(
+//  DevicePreview(
+//    builder: (context) => MyApp(),
+//  ),
+//);
+//
+//
+//class MyApp extends StatelessWidget {
+//  @override
+//  Widget build(BuildContext context) {
+//    return MaterialApp(
+//      locale: DevicePreview.of(context).locale, // <--- Add the locale
+//      builder: DevicePreview.appBuilder, // <--- Add the builder
+//      title: 'Flutter Demo',
+//      theme: ThemeData(
+//        primarySwatch: Colors.blue,
+//      ),
+//      home: MyHomePage(title: 'Flutter Demo Home Page'),
+//    );
+//  }
+//}
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -11,17 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-//      title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.green,
         backgroundColor: Colors.green,
       ),
@@ -33,15 +47,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -49,19 +54,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  TextEditingController facebook_text =
-      new TextEditingController(text: "Link  Text");
-  TextEditingController twitter_text =
-      new TextEditingController(text: "Link  Text");
-  TextEditingController linkedin_text =
-      new TextEditingController(text: "Link  Text");
-  TextEditingController pinterest_text =
-      new TextEditingController(text: "Link  Text");
-  TextEditingController tumblr_text =
-      new TextEditingController(text: "Link  Text");
-  TextEditingController whatsapp_text =
-      new TextEditingController(text: "Link  Text");
+  TextEditingController facebook_text = new TextEditingController();
+  TextEditingController twitter_text = new TextEditingController();
+  TextEditingController linkedin_text = new TextEditingController();
+  TextEditingController pinterest_text = new TextEditingController();
+  TextEditingController tumblr_text = new TextEditingController();
+  TextEditingController whatsapp_text = new TextEditingController();
 
   TextEditingController url_text = new TextEditingController();
   TextEditingController message_text = new TextEditingController();
@@ -99,7 +97,8 @@ class _MyHomePageState extends State<MyHomePage> {
     updatedUrl = updatedUrl.toString().replaceAll("/", "%2F");
     updatedUrl = updatedUrl.toString().replaceAll("#", "%23");
     String link =
-        "http://www.linkedin.com/shareArticle?mini=true&url=$updatedUrl&text=$updatedMessage";
+        "https://www.linkedin.com/shareArticle?mini=true&url=$updatedUrl&summary=$updatedMessage";
+
     print(link);
     setState(() {
       linkedin_text.text = link;
@@ -149,15 +148,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   generateURLS() {
-    String url = url_text.text;
-    String message = message_text.text;
-    String phone = phone_text.text;
+    String url = url_text.text.trim();
+    String message = message_text.text.trim();
+    String phone = phone_text.text.trim();
     _generateFacebook(url: url);
     _generateTwitter(url: url, message: message);
     _generateLinkedIn(url: url, message: message);
     _generatePinterest(url: url, message: message);
     _generateTumblr(url: url, message: message);
     _generateWhatsapp(message: message, phone: phone);
+    FocusScope.of(context).requestFocus(FocusNode());
   }
 
   clearBox(TextEditingController controller) {
@@ -167,19 +167,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   copyToClipboard(TextEditingController controller) {
-    Clipboard.setData(new ClipboardData(text: controller.text));
-    Toast.show("Link copied to clipboard", context);
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+    if (!controller.text.isEmpty) {
+      Clipboard.setData(new ClipboardData(text: controller.text));
+      Toast.show("Link copied to clipboard", context);
+    }
   }
 
   @override
@@ -191,220 +182,249 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
-
-//      appBar: AppBar(
-//        // Here we take the value from the MyHomePage object that was created by
-//        // the App.build method, and use it to set our appbar title.
-//        title: Text(widget.title),
-//      ),
-//body: Container(
-//      padding: EdgeInsets.only(top: 2.0),
-//      height: 5.0 * 4,
-//      child: Center(
-//      child: Text(
-//      "test",
-//      style: const TextStyle(
-//      color: Colors.white, fontFamily: 'Kranky', fontSize: 36.0),
-//      ),
-//      ),
-//      decoration: BoxDecoration(
-//      gradient: LinearGradient(
-//      colors: [
-//      Colors.deepOrange,
-//      Colors.orangeAccent,
-//      ],
-//      ),
-//      ),
-//),
 
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              child: TextFormField(
-                controller: message_text,
-                decoration: InputDecoration(
-                    hintText: 'Message ',
-                    filled: true,
-                    prefixIcon: Icon(
-                      Icons.text_fields,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            // Column is also a layout widget. It takes a list of children and
+            // arranges them vertically. By default, it sizes itself to fit its
+            // children horizontally, and tries to be as tall as its parent.
+            //
+            // Invoke "debug painting" (press "p" in the console, choose the
+            // "Toggle Debug Paint" action from the Flutter Inspector in Android
+            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+            // to see the wireframe for each widget.
+            //
+            // Column has various properties to control how it sizes itself and
+            // how it positions its children. Here we use mainAxisAlignment to
+            // center the children vertically; the main axis here is the vertical
+            // axis because Columns are vertical (the cross axis would be
+            // horizontal).
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                child: TextFormField(
+                  controller: message_text,
+                  decoration: InputDecoration(
+                      hintText: 'Message ',
+                      filled: true,
+                      prefixIcon: Icon(
+                        Icons.text_fields,
 //                      size: 28.0,
-                    ),
-                    suffixIcon: IconButton(
-                        icon: Icon(Icons.clear),
-                        onPressed: () {
-                          clearBox(message_text);
-                        })),
+                      ),
+                      suffixIcon: IconButton(
+                          icon: Icon(Icons.clear),
+                          onPressed: () {
+                            clearBox(message_text);
+                          })),
+                ),
               ),
-            ),
-            Container(
-              child: TextFormField(
-                controller: url_text,
-                decoration: InputDecoration(
-                    hintText: 'Link URL',
-                    filled: true,
-                    prefixIcon: Icon(
-                      Icons.link,
+              Container(
+                child: TextFormField(
+                  controller: url_text,
+                  decoration: InputDecoration(
+                      hintText: 'Link URL',
+                      filled: true,
+                      prefixIcon: Icon(
+                        Icons.link,
 //                      size: 28.0,
-                    ),
-                    suffixIcon: IconButton(
-                        icon: Icon(Icons.clear),
-                        onPressed: () {
-                          clearBox(url_text);
-                        })),
+                      ),
+                      suffixIcon: IconButton(
+                          icon: Icon(Icons.clear),
+                          onPressed: () {
+                            clearBox(url_text);
+                          })),
+                ),
               ),
-            ),
-            Container(
-              child: TextFormField(
-                controller: phone_text,
-                decoration: InputDecoration(
-                    hintText: '(Optional) Phone number for whatsappe',
-                    filled: true,
-                    prefixIcon: Icon(
-                      Icons.phone,
+              Container(
+                child: TextFormField(
+                  controller: phone_text,
+                  decoration: InputDecoration(
+                      hintText: 'Phone number for whatsapp link',
+                      filled: true,
+                      prefixIcon: Icon(
+                        Icons.phone,
 //                      size: 28.0,
-                    ),
-                    suffixIcon: IconButton(
-                        icon: Icon(Icons.clear),
-                        onPressed: () {
-                          clearBox(phone_text);
-                        })),
-              ),
-            ),
-            RaisedButton(
-                color: Colors.green,
-                onPressed: generateURLS,
-                child: Text(
-                  'Generate Links',
-                )),
-            TextField(
-              onTap: () {
-                copyToClipboard(facebook_text);
-              },
-              controller: facebook_text,
-              readOnly: true,
-              decoration: InputDecoration(
-                icon: Icon(
-                  Custom.facebook,
-                  color: Colors.blue,
+                      ),
+                      suffixIcon: IconButton(
+                          icon: Icon(Icons.clear),
+                          onPressed: () {
+                            clearBox(phone_text);
+                          })),
                 ),
-                labelText: 'Facebook  Link',
-                suffixIcon: IconButton(
-                    icon: Icon(Icons.share),
-                    onPressed: () {
-                      Share.share(facebook_text.text);
-                    }),
               ),
-            ),
-            TextField(
-              controller: twitter_text,
-              onTap: () {
-                copyToClipboard(twitter_text);
-              },
-              readOnly: true,
-              decoration: InputDecoration(
-                icon: Icon(
-                  Custom.twitter,
-                  color: Colors.lightBlueAccent,
+              RaisedButton(
+                  color: Colors.green,
+                  onPressed: generateURLS,
+                  child: Text(
+                    'Generate Links',
+                  )),
+              TextField(
+                onTap: () {
+                  copyToClipboard(facebook_text);
+                },
+                controller: facebook_text,
+                readOnly: true,
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Custom.facebook,
+                    color: Colors.blue,
+                  ),
+                  labelText: 'Facebook',
+                  suffixIcon: IconButton(
+                      icon: Icon(Icons.share),
+                      onPressed: () {
+                        Share.share(facebook_text.text);
+                      }),
                 ),
-                labelText: 'Twitter  Link',
-                suffixIcon: IconButton(
-                    icon: Icon(Icons.share),
-                    onPressed: () {
-                      Share.share(tumblr_text.text);
-                    }),
               ),
-            ),
-            TextField(
-              controller: pinterest_text,
-              onTap: () {
-                copyToClipboard(pinterest_text);
-              },
-              readOnly: true,
-              decoration: InputDecoration(
-                icon: Icon(
-                  Custom.pinterest,
-                  color: Colors.red,
+              TextField(
+                controller: twitter_text,
+                onTap: () {
+                  copyToClipboard(twitter_text);
+                },
+                readOnly: true,
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Custom.twitter,
+                    color: Colors.lightBlueAccent,
+                  ),
+                  labelText: 'Twitter',
+                  suffixIcon: IconButton(
+                      icon: Icon(Icons.share),
+                      onPressed: () {
+                        Share.share(twitter_text.text);
+                      }),
                 ),
-                labelText: 'Pinterest  Link',
-                suffixIcon: IconButton(
-                    icon: Icon(Icons.share),
-                    onPressed: () {
-                      Share.share(pinterest_text.text);
-                    }),
               ),
-            ),
-            TextField(
-              controller: linkedin_text,
-              onTap: () {
-                copyToClipboard(linkedin_text);
-              },
-              readOnly: true,
-              decoration: InputDecoration(
-                icon: Icon(
-                  Custom.linkedin_squared,
-                  color: Colors.blueAccent,
+
+              TextField(
+                controller: linkedin_text,
+                onTap: () {
+                  copyToClipboard(linkedin_text);
+                },
+                readOnly: true,
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Custom.linkedin_squared,
+                    color: Colors.blueAccent,
+                  ),
+                  labelText: 'LinkedIn',
+                  suffixIcon: IconButton(
+                      icon: Icon(Icons.share),
+                      onPressed: () {
+                        Share.share(linkedin_text.text);
+                      }),
                 ),
-                labelText: 'LinkedIn  Link',
-                suffixIcon: IconButton(
-                    icon: Icon(Icons.share),
-                    onPressed: () {
-                      Share.share(linkedin_text.text);
-                    }),
               ),
-            ),
-            TextField(
-              controller: tumblr_text,
-              onTap: () {
-                copyToClipboard(tumblr_text);
-              },
-              readOnly: true,
-              decoration: InputDecoration(
-                icon: Icon(Custom.tumblr, color: Colors.blueGrey),
-                labelText: 'Tumblr  Link',
-                suffixIcon: IconButton(
-                    icon: Icon(Icons.share),
-                    onPressed: () {
-                      Share.share(tumblr_text.text);
-                    }),
+              TextField(
+                controller: whatsapp_text,
+                onTap: () {
+                  copyToClipboard(whatsapp_text);
+                },
+                readOnly: true,
+                decoration: InputDecoration(
+                  icon: Icon(Custom.whatsapp, color: Colors.green),
+                  labelText: 'Whatsapp',
+                  suffixIcon: IconButton(
+                      icon: Icon(Icons.share),
+                      onPressed: () {
+                        Share.share(whatsapp_text.text);
+                      }),
+                ),
               ),
-            ),
-            TextField(
-              controller: whatsapp_text,
-              onTap: () {
-                copyToClipboard(whatsapp_text);
-              },
-              readOnly: true,
-              decoration: InputDecoration(
-                icon: Icon(Custom.whatsapp, color: Colors.green),
-                labelText: 'Tumblr  Link',
-                suffixIcon: IconButton(
-                    icon: Icon(Icons.share),
-                    onPressed: () {
-                      Share.share(whatsapp_text.text);
-                    }),
+              TextField(
+                controller: pinterest_text,
+                onTap: () {
+                  copyToClipboard(pinterest_text);
+                },
+                readOnly: true,
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Custom.pinterest,
+                    color: Colors.red,
+                  ),
+                  labelText: 'Pinterest',
+                  suffixIcon: IconButton(
+                      icon: Icon(Icons.share),
+                      onPressed: () {
+                        Share.share(pinterest_text.text);
+                      }),
+                ),
               ),
-            ),
-          ],
+              TextField(
+                controller: tumblr_text,
+                onTap: () {
+                  copyToClipboard(tumblr_text);
+                },
+                readOnly: true,
+                decoration: InputDecoration(
+                  icon: Icon(Custom.tumblr, color: Colors.blueGrey),
+                  labelText: 'Tumblr',
+                  suffixIcon: IconButton(
+                      icon: Icon(Icons.share),
+                      onPressed: () {
+                        Share.share(tumblr_text.text);
+                      }),
+                ),
+              ),
+
+//              TextField(
+//                controller: email_text,
+//                onTap: () {
+//                  copyToClipboard(whatsapp_text);
+//                },
+//                readOnly: true,
+//                decoration: InputDecoration(
+//                  icon: Icon(Icons.email, color: Colors.green),
+//                  labelText: 'email',
+//                  suffixIcon: IconButton(
+//                      icon: Icon(Icons.share),
+//                      onPressed: () {
+//                        Share.share(email_text.text);
+//                      }),
+//                ),
+//              ),
+            ],
+          ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              // return object of type Dialog
+              return AlertDialog(
+                title: new Text("How to use this application"),
+                content: new Text(
+                    "To use the application paste or type a message, an URL and a phone number. Then press Generate Links button.\n"
+                        "\nYou can click the generated URLs to copy or press the share button to share with other applications.\n\n"
+                        "\nFacebook URL can embed a link."
+                        "\nTwitter URL can embed a message."
+                        "\nLinkedIn URL can embead link and a message"
+                        "\nWhatsApp URL can embead message and a phone number"
+                        "\nPinterest URL can embead a link and a message"
+                        "\nTumblr URL can embead a link and a message",
+                    textAlign: TextAlign.center),
+                actions: <Widget>[
+                  // usually buttons at the bottom of the dialog
+                  new FlatButton(
+                    child: new Text("Close"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Icon(Icons.help),
+        backgroundColor: Colors.green,
       ),
       // This trailing comma makes auto-formatting nicer for build methods.
     );

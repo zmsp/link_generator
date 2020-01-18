@@ -1,4 +1,4 @@
-package io.datamachines.zmsp.link_generator
+package io.github.zmsp.link_generator
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

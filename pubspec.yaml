@@ -1,5 +1,5 @@
 name: link_generator
-description: Generates social network links. 
+description: Generates social network links for facebook, twitter, whatsapp, linkedin, and pinterest.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -11,7 +11,7 @@ description: Generates social network links.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -25,6 +25,11 @@ dependencies:
   cupertino_icons: ^0.1.2
   share: ^0.6.3+5
   toast: ^0.1.5
+  device_preview: ^0.2.6
+  path_provider_fde:
+    git:
+      url: https://github.com/google/flutter-desktop-embedding/
+      path: plugins/flutter_plugins/path_provider_fde
 
 dev_dependencies:
   flutter_test:
