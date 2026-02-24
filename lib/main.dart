@@ -1,432 +1,429 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 import 'custom_icons.dart';
-import 'package:share/share.dart';
-import "package:flutter/services.dart";
-import "package:toast/toast.dart";
 
-///DEBUG CODE
-//import 'package:device_preview/device_preview.dart';
-//void main() => runApp(
-//  DevicePreview(
-//    builder: (context) => MyApp(),
-//  ),
-//);
-//
-//
-//class MyApp extends StatelessWidget {
-//  @override
-//  Widget build(BuildContext context) {
-//    return MaterialApp(
-//      locale: DevicePreview.of(context).locale, // <--- Add the locale
-//      builder: DevicePreview.appBuilder, // <--- Add the builder
-//      title: 'Flutter Demo',
-//      theme: ThemeData(
-//        primarySwatch: Colors.blue,
-//      ),
-//      home: MyHomePage(title: 'Flutter Demo Home Page'),
-//    );
-//  }
-//}
-
-void main() => runApp(MyApp());
+void main() {
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Deep Link Generator',
       theme: ThemeData(
-        primarySwatch: Colors.green,
-        backgroundColor: Colors.green,
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const LinkGenerator(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
+class LinkGenerator extends StatefulWidget {
+  const LinkGenerator({Key? key}) : super(key: key);
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _LinkGeneratorState createState() => _LinkGeneratorState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  TextEditingController facebook_text = new TextEditingController();
-  TextEditingController twitter_text = new TextEditingController();
-  TextEditingController linkedin_text = new TextEditingController();
-  TextEditingController pinterest_text = new TextEditingController();
-  TextEditingController tumblr_text = new TextEditingController();
-  TextEditingController whatsapp_text = new TextEditingController();
+class _LinkGeneratorState extends State<LinkGenerator> {
+  String selectedApp = 'WhatsApp';
+  final TextEditingController textController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController urlController = TextEditingController();
 
-  TextEditingController url_text = new TextEditingController();
-  TextEditingController message_text = new TextEditingController();
-  TextEditingController phone_text = new TextEditingController();
+  late SharedPreferences prefs;
+  bool _isInit = false;
 
-  String _generateFacebook({url}) {
-    String updatedUrl = url.toString().replaceAll(":", "%3A");
-    updatedUrl = updatedUrl.toString().replaceAll("/", "%2F");
-    updatedUrl = updatedUrl.toString().replaceAll("#", "%23");
-    String link = "https://www.facebook.com/sharer/sharer.php?u=$updatedUrl";
-    print("facebook link :" + link);
-    setState(() {
-      facebook_text.text = link;
-    });
-    return link;
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs();
+
+    textController.addListener(_savePrefs);
+    phoneController.addListener(_savePrefs);
+    urlController.addListener(_savePrefs);
   }
 
-  String _generateTwitter({url, message}) {
-    String updatedMessage = message.toString().replaceAll(" ", "%20");
-    String updatedUrl = url.toString().replaceAll(":", "%3A");
-    updatedUrl = updatedUrl.toString().replaceAll("/", "%2F");
-    updatedUrl = updatedUrl.toString().replaceAll("#", "%23");
-    String link =
-        "https://twitter.com/intent/tweet?url=$updatedUrl&text=$updatedMessage";
-    print(link);
-    setState(() {
-      twitter_text.text = link;
-    });
-    return link;
+  @override
+  void dispose() {
+    textController.dispose();
+    phoneController.dispose();
+    urlController.dispose();
+    super.dispose();
   }
 
-  String _generateLinkedIn({url, message}) {
-    String updatedMessage = message.toString().replaceAll(" ", "%20");
-    String updatedUrl = url.toString().replaceAll(":", "%3A");
-    updatedUrl = updatedUrl.toString().replaceAll("/", "%2F");
-    updatedUrl = updatedUrl.toString().replaceAll("#", "%23");
-    String link =
-        "https://www.linkedin.com/shareArticle?mini=true&url=$updatedUrl&summary=$updatedMessage";
-
-    print(link);
+  Future<void> _loadPrefs() async {
+    prefs = await SharedPreferences.getInstance();
     setState(() {
-      linkedin_text.text = link;
-    });
-    return link;
-  }
-
-  String _generatePinterest({url, message}) {
-    String updatedMessage = message.toString().replaceAll(" ", "%20");
-    String updatedUrl = url.toString().replaceAll(":", "%3A");
-    updatedUrl = updatedUrl.toString().replaceAll("/", "%2F");
-    updatedUrl = updatedUrl.toString().replaceAll("#", "%23");
-    String link =
-        "http://pinterest.com/pin/create/button/?url=$updatedUrl&media=&description=$updatedMessage";
-    print(link);
-    setState(() {
-      pinterest_text.text = link;
-    });
-    return link;
-  }
-
-  String _generateTumblr({url, message}) {
-    String updatedMessage = message.toString().replaceAll(" ", "%20");
-    String updatedUrl = url.toString().replaceAll(":", "%3A");
-    updatedUrl = updatedUrl.toString().replaceAll("/", "%2F");
-    updatedUrl = updatedUrl.toString().replaceAll("#", "%23");
-    String link =
-        "http://www.tumblr.com/share?v=3&u=$updatedUrl&t=$updatedMessage";
-    print(link);
-    setState(() {
-      tumblr_text.text = link;
-    });
-    return link;
-  }
-
-  String _generateWhatsapp({message, phone}) {
-    String updatedMessage = message.toString().replaceAll(" ", "%20");
-    String updatedPhone = phone.toString().replaceAll(" ", "");
-
-    String link =
-        "https://api.whatsapp.com/send?phone=$updatedPhone&text=$updatedMessage";
-    print(link);
-    setState(() {
-      whatsapp_text.text = link;
-    });
-    return link;
-  }
-
-  generateURLS() {
-    String url = url_text.text.trim();
-    String message = message_text.text.trim();
-    String phone = phone_text.text.trim();
-    _generateFacebook(url: url);
-    _generateTwitter(url: url, message: message);
-    _generateLinkedIn(url: url, message: message);
-    _generatePinterest(url: url, message: message);
-    _generateTumblr(url: url, message: message);
-    _generateWhatsapp(message: message, phone: phone);
-    FocusScope.of(context).requestFocus(FocusNode());
-  }
-
-  clearBox(TextEditingController controller) {
-    setState(() {
-      controller.text = "";
+      textController.text = prefs.getString('text') ?? '';
+      phoneController.text = prefs.getString('phone') ?? '';
+      urlController.text = prefs.getString('url') ?? '';
+      selectedApp = prefs.getString('app') ?? 'WhatsApp';
+      if (!generators.containsKey(selectedApp)) selectedApp = 'WhatsApp';
+      _isInit = true;
     });
   }
 
-  copyToClipboard(TextEditingController controller) {
-    if (!controller.text.isEmpty) {
-      Clipboard.setData(new ClipboardData(text: controller.text));
-      Toast.show("Link copied to clipboard", context);
+  Future<void> _savePrefs() async {
+    if (!_isInit) return;
+    await prefs.setString('text', textController.text);
+    await prefs.setString('phone', phoneController.text);
+    await prefs.setString('url', urlController.text);
+    await prefs.setString('app', selectedApp);
+    setState(() {}); // Update the preview link
+  }
+
+  final List<String> apps = [
+    'WhatsApp',
+    'Facebook',
+    'Instagram',
+    'LinkedIn',
+    'X/Twitter',
+    'TikTok',
+    'Telegram',
+    'Snapchat'
+  ];
+
+  late final Map<String, String Function()> generators = {
+    'WhatsApp': () =>
+        'whatsapp://send?text=${Uri.encodeComponent(textController.text)}${phoneController.text.isNotEmpty ? '&phone=${phoneController.text}' : ''}',
+    'Facebook': () =>
+        'fb://facewebmodal/f?href=${Uri.encodeComponent(urlController.text)}',
+    'Instagram': () =>
+        'instagram-stories://share?source_application=${Uri.encodeComponent(urlController.text)}',
+    'LinkedIn': () =>
+        'linkedin://shareArticle?mini=true&url=${Uri.encodeComponent(urlController.text)}&summary=${Uri.encodeComponent(textController.text)}',
+    'X/Twitter': () =>
+        'twitter://post?message=${Uri.encodeComponent(textController.text)}',
+    'TikTok': () =>
+        'tiktok://user?user_id=${Uri.encodeComponent(urlController.text)}',
+    'Telegram': () =>
+        'tg://resolve?domain=${phoneController.text}&text=${Uri.encodeComponent(textController.text)}',
+    'Snapchat': () =>
+        'snapchat://add/${Uri.encodeComponent(urlController.text)}',
+  };
+
+  void _copyToClipboard(String link) {
+    Clipboard.setData(ClipboardData(text: link));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Link copied to clipboard')),
+    );
+  }
+
+  Future<File> _generateQRImageFile(String link) async {
+    final qrValidationResult = QrValidator.validate(
+      data: link,
+      version: QrVersions.auto,
+      errorCorrectionLevel: QrErrorCorrectLevel.L,
+    );
+    final qrCode = qrValidationResult.qrCode;
+    final painter = QrPainter.withQr(
+      qr: qrCode!,
+      eyeStyle: const QrEyeStyle(
+        eyeShape: QrEyeShape.square,
+        color: Color(0xFF000000),
+      ),
+      dataModuleStyle: const QrDataModuleStyle(
+        dataModuleShape: QrDataModuleShape.square,
+        color: Color(0xFF000000),
+      ),
+      gapless: true,
+    );
+
+    final picData =
+        await painter.toImageData(2048, format: ui.ImageByteFormat.png);
+    final buffer = picData!.buffer;
+    final tempDir = await getTemporaryDirectory();
+    final file = await File('${tempDir.path}/qr_code.png').writeAsBytes(
+        buffer.asUint8List(picData.offsetInBytes, picData.lengthInBytes));
+    return file;
+  }
+
+  void _showQRCode(String link) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('QR Code'),
+        content: SizedBox(
+          width: 250,
+          height: 250,
+          child: QrImageView(
+            data: link,
+            version: QrVersions.auto,
+            size: 250.0,
+            backgroundColor: Colors.white,
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              try {
+                final file = await _generateQRImageFile(link);
+                await SharePlus.instance.share(
+                  ShareParams(
+                    files: [XFile(file.path)],
+                    text: 'Check out this deep link QR code!',
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Failed to share QR code.')),
+                );
+              }
+            },
+            icon: const Icon(Icons.share),
+            tooltip: 'Share',
+          ),
+          IconButton(
+            onPressed: () async {
+              try {
+                if (Platform.isAndroid || Platform.isIOS) {
+                  var status = await Permission.storage.request();
+                  if (status.isGranted) {
+                    final file = await _generateQRImageFile(link);
+                    final result = await ImageGallerySaver.saveFile(file.path);
+                    if (result['isSuccess'] == true) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('QR code saved to gallery!')),
+                      );
+                    } else {
+                      throw Exception('Save failed');
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Storage permission required.')),
+                    );
+                  }
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Failed to save QR code.')),
+                );
+              }
+            },
+            icon: const Icon(Icons.download),
+            tooltip: 'Save',
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _generateAndLaunch() async {
+    await _savePrefs();
+    final link = generators[selectedApp]!();
+    final uri = Uri.parse(link);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('App not installed, use web fallback')),
+      );
+      // Fallback web logic
+      String webUrl = '';
+      if (selectedApp == 'WhatsApp')
+        webUrl =
+            'https://wa.me/${phoneController.text}?text=${Uri.encodeComponent(textController.text)}';
+      else if (selectedApp == 'Facebook')
+        webUrl =
+            'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(urlController.text)}';
+      else if (selectedApp == 'X/Twitter')
+        webUrl =
+            'https://twitter.com/intent/tweet?text=${Uri.encodeComponent(textController.text)}';
+      else if (selectedApp == 'LinkedIn')
+        webUrl =
+            'https://www.linkedin.com/shareArticle?mini=true&url=${Uri.encodeComponent(urlController.text)}&summary=${Uri.encodeComponent(textController.text)}';
+      else if (selectedApp == 'Telegram')
+        webUrl =
+            'https://t.me/share/url?url=${Uri.encodeComponent(urlController.text)}&text=${Uri.encodeComponent(textController.text)}';
+
+      if (webUrl.isNotEmpty) {
+        final webUri = Uri.parse(webUrl);
+        if (await canLaunchUrl(webUri)) {
+          await launchUrl(webUri, mode: LaunchMode.externalApplication);
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    if (!_isInit) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
-
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(8.0),
-          child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Invoke "debug painting" (press "p" in the console, choose the
-            // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            // to see the wireframe for each widget.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                child: TextFormField(
-                  controller: message_text,
-                  decoration: InputDecoration(
-                      hintText: 'Message ',
-                      filled: true,
-                      prefixIcon: Icon(
-                        Icons.text_fields,
-//                      size: 28.0,
-                      ),
-                      suffixIcon: IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            clearBox(message_text);
-                          })),
+      appBar: AppBar(title: const Text('Deep Link Generator')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            InputDecorator(
+              decoration: const InputDecoration(
+                  labelText: 'Select App', border: OutlineInputBorder()),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedApp,
+                  isDense: true,
+                  items: apps.map((app) {
+                    IconData iconData;
+                    Color iconColor;
+                    switch (app) {
+                      case 'WhatsApp':
+                        iconData = Custom.whatsapp;
+                        iconColor = Colors.green;
+                        break;
+                      case 'Facebook':
+                        iconData = Custom.facebook;
+                        iconColor = Colors.blue;
+                        break;
+                      case 'Instagram':
+                        iconData = Icons
+                            .camera_alt; // Using internal flutter icon as custom font misses Instagram
+                        iconColor = Colors.purple;
+                        break;
+                      case 'LinkedIn':
+                        iconData = Custom.linkedin_squared;
+                        iconColor = Colors.blueAccent;
+                        break;
+                      case 'X/Twitter':
+                        iconData = Custom.twitter;
+                        iconColor = Colors.lightBlueAccent;
+                        break;
+                      case 'TikTok':
+                        iconData = Icons.music_note; // Missing TikTok from font
+                        iconColor = Colors.black;
+                        break;
+                      case 'Telegram':
+                        iconData = Icons.send; // Missing Telegram from font
+                        iconColor = Colors.blue;
+                        break;
+                      case 'Snapchat':
+                        iconData = Icons
+                            .chat_bubble_outline; // Missing Snapchat from font
+                        iconColor = Colors.yellow[700]!;
+                        break;
+                      default:
+                        iconData = Icons.apps;
+                        iconColor = Colors.grey;
+                    }
+                    return DropdownMenuItem(
+                        value: app,
+                        child: Row(
+                          children: [
+                            Icon(iconData, color: iconColor),
+                            const SizedBox(width: 10),
+                            Text(app),
+                          ],
+                        ));
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedApp = value!;
+                      _savePrefs();
+                    });
+                  },
                 ),
               ),
-              Container(
-                child: TextFormField(
-                  controller: url_text,
-                  decoration: InputDecoration(
-                      hintText: 'Link URL',
-                      filled: true,
-                      prefixIcon: Icon(
-                        Icons.link,
-//                      size: 28.0,
-                      ),
-                      suffixIcon: IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            clearBox(url_text);
-                          })),
-                ),
-              ),
-              Container(
-                child: TextFormField(
-                  controller: phone_text,
-                  decoration: InputDecoration(
-                      hintText: 'Phone number for whatsapp link',
-                      filled: true,
-                      prefixIcon: Icon(
-                        Icons.phone,
-//                      size: 28.0,
-                      ),
-                      suffixIcon: IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            clearBox(phone_text);
-                          })),
-                ),
-              ),
-              RaisedButton(
-                  color: Colors.green,
-                  onPressed: generateURLS,
-                  child: Text(
-                    'Generate Links',
-                  )),
-              TextField(
-                onTap: () {
-                  copyToClipboard(facebook_text);
-                },
-                controller: facebook_text,
-                readOnly: true,
-                decoration: InputDecoration(
-                  icon: Icon(
-                    Custom.facebook,
-                    color: Colors.blue,
+            ),
+            const SizedBox(height: 16),
+            ExpansionTile(
+              title: const Text('Input Fields'),
+              initiallyExpanded: true,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 4.0),
+                  child: TextFormField(
+                    controller: textController,
+                    decoration: const InputDecoration(
+                        labelText: 'Text/Message',
+                        border: OutlineInputBorder()),
+                    maxLines: 3,
                   ),
-                  labelText: 'Facebook',
-                  suffixIcon: IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () {
-                        Share.share(facebook_text.text);
-                      }),
                 ),
-              ),
-              TextField(
-                controller: twitter_text,
-                onTap: () {
-                  copyToClipboard(twitter_text);
-                },
-                readOnly: true,
-                decoration: InputDecoration(
-                  icon: Icon(
-                    Custom.twitter,
-                    color: Colors.lightBlueAccent,
+                if (['WhatsApp', 'Telegram'].contains(selectedApp))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 4.0),
+                    child: TextFormField(
+                      controller: phoneController,
+                      decoration: const InputDecoration(
+                          labelText: 'Phone/Username',
+                          border: OutlineInputBorder()),
+                    ),
                   ),
-                  labelText: 'Twitter',
-                  suffixIcon: IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () {
-                        Share.share(twitter_text.text);
-                      }),
-                ),
-              ),
-
-              TextField(
-                controller: linkedin_text,
-                onTap: () {
-                  copyToClipboard(linkedin_text);
-                },
-                readOnly: true,
-                decoration: InputDecoration(
-                  icon: Icon(
-                    Custom.linkedin_squared,
-                    color: Colors.blueAccent,
+                if (!['WhatsApp'].contains(selectedApp))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 4.0),
+                    child: TextFormField(
+                      controller: urlController,
+                      decoration: const InputDecoration(
+                          labelText: 'URL/Post/User ID',
+                          border: OutlineInputBorder()),
+                    ),
                   ),
-                  labelText: 'LinkedIn',
-                  suffixIcon: IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () {
-                        Share.share(linkedin_text.text);
-                      }),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _generateAndLaunch,
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('Launch'),
                 ),
-              ),
-              TextField(
-                controller: whatsapp_text,
-                onTap: () {
-                  copyToClipboard(whatsapp_text);
-                },
-                readOnly: true,
-                decoration: InputDecoration(
-                  icon: Icon(Custom.whatsapp, color: Colors.green),
-                  labelText: 'Whatsapp',
-                  suffixIcon: IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () {
-                        Share.share(whatsapp_text.text);
-                      }),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final link = generators[selectedApp]!();
+                    _copyToClipboard(link);
+                  },
+                  icon: const Icon(Icons.copy),
+                  label: const Text('Copy'),
                 ),
-              ),
-              TextField(
-                controller: pinterest_text,
-                onTap: () {
-                  copyToClipboard(pinterest_text);
-                },
-                readOnly: true,
-                decoration: InputDecoration(
-                  icon: Icon(
-                    Custom.pinterest,
-                    color: Colors.red,
-                  ),
-                  labelText: 'Pinterest',
-                  suffixIcon: IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () {
-                        Share.share(pinterest_text.text);
-                      }),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final link = generators[selectedApp]!();
+                    _showQRCode(link);
+                  },
+                  icon: const Icon(Icons.qr_code),
+                  label: const Text('QR'),
                 ),
-              ),
-              TextField(
-                controller: tumblr_text,
-                onTap: () {
-                  copyToClipboard(tumblr_text);
-                },
-                readOnly: true,
-                decoration: InputDecoration(
-                  icon: Icon(Custom.tumblr, color: Colors.blueGrey),
-                  labelText: 'Tumblr',
-                  suffixIcon: IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () {
-                        Share.share(tumblr_text.text);
-                      }),
-                ),
-              ),
-
-//              TextField(
-//                controller: email_text,
-//                onTap: () {
-//                  copyToClipboard(whatsapp_text);
-//                },
-//                readOnly: true,
-//                decoration: InputDecoration(
-//                  icon: Icon(Icons.email, color: Colors.green),
-//                  labelText: 'email',
-//                  suffixIcon: IconButton(
-//                      icon: Icon(Icons.share),
-//                      onPressed: () {
-//                        Share.share(email_text.text);
-//                      }),
-//                ),
-//              ),
-            ],
-          ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            Text('Generated Link Preview:',
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            SelectableText(
+              generators[selectedApp]!(),
+              style: const TextStyle(
+                  color: Colors.blue, decoration: TextDecoration.underline),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              // return object of type Dialog
-              return AlertDialog(
-                title: new Text("How to use this application"),
-                content: new Text(
-                    "To use the application paste or type a message, an URL and a phone number. Then press Generate Links button.\n"
-                        "\nYou can click the generated URLs to copy or press the share button to share with other applications.\n\n"
-                        "\nFacebook URL can embed a link."
-                        "\nTwitter URL can embed a message."
-                        "\nLinkedIn URL can embead link and a message"
-                        "\nWhatsApp URL can embead message and a phone number"
-                        "\nPinterest URL can embead a link and a message"
-                        "\nTumblr URL can embead a link and a message",
-                    textAlign: TextAlign.center),
-                actions: <Widget>[
-                  // usually buttons at the bottom of the dialog
-                  new FlatButton(
-                    child: new Text("Close"),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        },
-        child: Icon(Icons.help),
-        backgroundColor: Colors.green,
-      ),
-      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
