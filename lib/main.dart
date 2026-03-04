@@ -38,9 +38,104 @@ class LinkGenerator extends StatefulWidget {
 
 class _LinkGeneratorState extends State<LinkGenerator> {
   String selectedApp = 'WhatsApp';
+
+  // Helper: returns icon + color for a given app name
+  ({IconData iconData, Color iconColor}) _appIcon(String app) {
+    switch (app) {
+      case 'WhatsApp':
+        return (iconData: Custom.whatsapp, iconColor: Colors.green);
+      case 'Facebook':
+        return (iconData: Custom.facebook, iconColor: Colors.blue);
+      case 'Instagram':
+        return (iconData: Icons.camera_alt, iconColor: Colors.purple);
+      case 'LinkedIn':
+        return (
+          iconData: Custom.linkedin_squared,
+          iconColor: Colors.blueAccent
+        );
+      case 'X/Twitter':
+        return (iconData: Custom.twitter, iconColor: Colors.lightBlueAccent);
+      case 'TikTok':
+        return (iconData: Icons.music_note, iconColor: Colors.black);
+      case 'Telegram':
+        return (iconData: Icons.send, iconColor: Colors.blue);
+      case 'Snapchat':
+        return (
+          iconData: Icons.chat_bubble_outline,
+          iconColor: Colors.yellow.shade700
+        );
+      default:
+        return (iconData: Icons.apps, iconColor: Colors.grey);
+    }
+  }
+
+  List<Widget> _buildSingleAppView() {
+    return [
+      Text('Generated Link Preview:',
+          style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      SelectableText(
+        generators[selectedApp]!(),
+        style: const TextStyle(
+            color: Colors.blue, decoration: TextDecoration.underline),
+        textAlign: TextAlign.center,
+      ),
+    ];
+  }
+
+  List<Widget> _buildAllAppsView() {
+    final appNames = apps.where((a) => a != 'All Apps').toList();
+    return [
+      Text('All Generated Links:',
+          style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      ...appNames.map((app) {
+        final link = generators[app]!();
+        final icon = _appIcon(app);
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          child: ListTile(
+            leading: Icon(icon.iconData, color: icon.iconColor, size: 28),
+            title:
+                Text(app, style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text(
+              link,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  color: Colors.blue, decoration: TextDecoration.underline),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.share, size: 20),
+                  tooltip: 'Share',
+                  onPressed: () => _shareLink(link),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy, size: 20),
+                  tooltip: 'Copy',
+                  onPressed: () => _copyToClipboard(link),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.qr_code, size: 20),
+                  tooltip: 'QR Code',
+                  onPressed: () => _showQRCode(link),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
+    ];
+  }
+
   final TextEditingController textController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController urlController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController hashtagsController = TextEditingController();
 
   late SharedPreferences prefs;
   bool _isInit = false;
@@ -53,6 +148,8 @@ class _LinkGeneratorState extends State<LinkGenerator> {
     textController.addListener(_savePrefs);
     phoneController.addListener(_savePrefs);
     urlController.addListener(_savePrefs);
+    titleController.addListener(_savePrefs);
+    hashtagsController.addListener(_savePrefs);
   }
 
   @override
@@ -60,6 +157,8 @@ class _LinkGeneratorState extends State<LinkGenerator> {
     textController.dispose();
     phoneController.dispose();
     urlController.dispose();
+    titleController.dispose();
+    hashtagsController.dispose();
     super.dispose();
   }
 
@@ -69,6 +168,8 @@ class _LinkGeneratorState extends State<LinkGenerator> {
       textController.text = prefs.getString('text') ?? '';
       phoneController.text = prefs.getString('phone') ?? '';
       urlController.text = prefs.getString('url') ?? '';
+      titleController.text = prefs.getString('title') ?? '';
+      hashtagsController.text = prefs.getString('hashtags') ?? '';
       selectedApp = prefs.getString('app') ?? 'WhatsApp';
       if (!generators.containsKey(selectedApp)) selectedApp = 'WhatsApp';
       _isInit = true;
@@ -80,11 +181,14 @@ class _LinkGeneratorState extends State<LinkGenerator> {
     await prefs.setString('text', textController.text);
     await prefs.setString('phone', phoneController.text);
     await prefs.setString('url', urlController.text);
+    await prefs.setString('title', titleController.text);
+    await prefs.setString('hashtags', hashtagsController.text);
     await prefs.setString('app', selectedApp);
     setState(() {}); // Update the preview link
   }
 
   final List<String> apps = [
+    'All Apps',
     'WhatsApp',
     'Facebook',
     'Instagram',
@@ -98,14 +202,33 @@ class _LinkGeneratorState extends State<LinkGenerator> {
   late final Map<String, String Function()> generators = {
     'WhatsApp': () =>
         'whatsapp://send?text=${Uri.encodeComponent(textController.text)}${phoneController.text.isNotEmpty ? '&phone=${phoneController.text}' : ''}',
-    'Facebook': () =>
-        'fb://facewebmodal/f?href=${Uri.encodeComponent(urlController.text)}',
+    'Facebook': () {
+      final href = Uri.encodeComponent(urlController.text);
+      final quote = textController.text.isNotEmpty
+          ? '&quote=${Uri.encodeComponent(textController.text)}'
+          : '';
+      return 'fb://facewebmodal/f?href=$href$quote';
+    },
     'Instagram': () =>
         'instagram-stories://share?source_application=${Uri.encodeComponent(urlController.text)}',
-    'LinkedIn': () =>
-        'linkedin://shareArticle?mini=true&url=${Uri.encodeComponent(urlController.text)}&summary=${Uri.encodeComponent(textController.text)}',
-    'X/Twitter': () =>
-        'twitter://post?message=${Uri.encodeComponent(textController.text)}',
+    'LinkedIn': () {
+      final url = Uri.encodeComponent(urlController.text);
+      final summary = Uri.encodeComponent(textController.text);
+      final title = titleController.text.isNotEmpty
+          ? '&title=${Uri.encodeComponent(titleController.text)}'
+          : '';
+      return 'linkedin://shareArticle?mini=true&url=$url&summary=$summary$title';
+    },
+    'X/Twitter': () {
+      final msg = Uri.encodeComponent(textController.text);
+      final url = urlController.text.isNotEmpty
+          ? '&url=${Uri.encodeComponent(urlController.text)}'
+          : '';
+      final tags = hashtagsController.text.isNotEmpty
+          ? '&hashtags=${Uri.encodeComponent(hashtagsController.text.replaceAll('#', ''))}'
+          : '';
+      return 'twitter://post?message=$msg$url$tags';
+    },
     'TikTok': () =>
         'tiktok://user?user_id=${Uri.encodeComponent(urlController.text)}',
     'Telegram': () =>
@@ -119,6 +242,16 @@ class _LinkGeneratorState extends State<LinkGenerator> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Link copied to clipboard')),
     );
+  }
+
+  Future<void> _shareLink(String link) async {
+    try {
+      await SharePlus.instance.share(ShareParams(text: link));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sharing not supported on this platform')),
+      );
+    }
   }
 
   Future<File> _generateQRImageFile(String link) async {
@@ -242,16 +375,28 @@ class _LinkGeneratorState extends State<LinkGenerator> {
       if (selectedApp == 'WhatsApp')
         webUrl =
             'https://wa.me/${phoneController.text}?text=${Uri.encodeComponent(textController.text)}';
-      else if (selectedApp == 'Facebook')
+      else if (selectedApp == 'Facebook') {
+        final quote = textController.text.isNotEmpty
+            ? '&quote=${Uri.encodeComponent(textController.text)}'
+            : '';
         webUrl =
-            'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(urlController.text)}';
-      else if (selectedApp == 'X/Twitter')
+            'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(urlController.text)}$quote';
+      } else if (selectedApp == 'X/Twitter') {
+        final url = urlController.text.isNotEmpty
+            ? '&url=${Uri.encodeComponent(urlController.text)}'
+            : '';
+        final tags = hashtagsController.text.isNotEmpty
+            ? '&hashtags=${Uri.encodeComponent(hashtagsController.text.replaceAll('#', ''))}'
+            : '';
         webUrl =
-            'https://twitter.com/intent/tweet?text=${Uri.encodeComponent(textController.text)}';
-      else if (selectedApp == 'LinkedIn')
+            'https://twitter.com/intent/tweet?text=${Uri.encodeComponent(textController.text)}$url$tags';
+      } else if (selectedApp == 'LinkedIn') {
+        final title = titleController.text.isNotEmpty
+            ? '&title=${Uri.encodeComponent(titleController.text)}'
+            : '';
         webUrl =
-            'https://www.linkedin.com/shareArticle?mini=true&url=${Uri.encodeComponent(urlController.text)}&summary=${Uri.encodeComponent(textController.text)}';
-      else if (selectedApp == 'Telegram')
+            'https://www.linkedin.com/shareArticle?mini=true&url=${Uri.encodeComponent(urlController.text)}&summary=${Uri.encodeComponent(textController.text)}$title';
+      } else if (selectedApp == 'Telegram')
         webUrl =
             'https://t.me/share/url?url=${Uri.encodeComponent(urlController.text)}&text=${Uri.encodeComponent(textController.text)}';
 
@@ -284,52 +429,12 @@ class _LinkGeneratorState extends State<LinkGenerator> {
                   value: selectedApp,
                   isDense: true,
                   items: apps.map((app) {
-                    IconData iconData;
-                    Color iconColor;
-                    switch (app) {
-                      case 'WhatsApp':
-                        iconData = Custom.whatsapp;
-                        iconColor = Colors.green;
-                        break;
-                      case 'Facebook':
-                        iconData = Custom.facebook;
-                        iconColor = Colors.blue;
-                        break;
-                      case 'Instagram':
-                        iconData = Icons
-                            .camera_alt; // Using internal flutter icon as custom font misses Instagram
-                        iconColor = Colors.purple;
-                        break;
-                      case 'LinkedIn':
-                        iconData = Custom.linkedin_squared;
-                        iconColor = Colors.blueAccent;
-                        break;
-                      case 'X/Twitter':
-                        iconData = Custom.twitter;
-                        iconColor = Colors.lightBlueAccent;
-                        break;
-                      case 'TikTok':
-                        iconData = Icons.music_note; // Missing TikTok from font
-                        iconColor = Colors.black;
-                        break;
-                      case 'Telegram':
-                        iconData = Icons.send; // Missing Telegram from font
-                        iconColor = Colors.blue;
-                        break;
-                      case 'Snapchat':
-                        iconData = Icons
-                            .chat_bubble_outline; // Missing Snapchat from font
-                        iconColor = Colors.yellow[700]!;
-                        break;
-                      default:
-                        iconData = Icons.apps;
-                        iconColor = Colors.grey;
-                    }
+                    final icon = _appIcon(app);
                     return DropdownMenuItem(
                         value: app,
                         child: Row(
                           children: [
-                            Icon(iconData, color: iconColor),
+                            Icon(icon.iconData, color: icon.iconColor),
                             const SizedBox(width: 10),
                             Text(app),
                           ],
@@ -349,78 +454,118 @@ class _LinkGeneratorState extends State<LinkGenerator> {
               title: const Text('Input Fields'),
               initiallyExpanded: true,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 4.0),
-                  child: TextFormField(
-                    controller: textController,
-                    decoration: const InputDecoration(
-                        labelText: 'Text/Message',
-                        border: OutlineInputBorder()),
-                    maxLines: 3,
+                // Text/Message — hidden for Snapchat/TikTok/Instagram (unused)
+                if (!['Snapchat', 'TikTok', 'Instagram', 'All Apps']
+                    .contains(selectedApp))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 4.0),
+                    child: TextFormField(
+                      controller: textController,
+                      decoration: InputDecoration(
+                          labelText: selectedApp == 'Facebook'
+                              ? 'Caption / Quote'
+                              : 'Text / Message',
+                          border: const OutlineInputBorder()),
+                      maxLines: 3,
+                    ),
                   ),
-                ),
-                if (['WhatsApp', 'Telegram'].contains(selectedApp))
+                // Phone / Username — WhatsApp & Telegram only
+                if (['WhatsApp', 'Telegram', 'All Apps'].contains(selectedApp))
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 4.0),
                     child: TextFormField(
                       controller: phoneController,
-                      decoration: const InputDecoration(
-                          labelText: 'Phone/Username',
-                          border: OutlineInputBorder()),
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                          labelText: selectedApp == 'Telegram'
+                              ? 'Username / Domain'
+                              : 'Phone Number',
+                          border: const OutlineInputBorder()),
                     ),
                   ),
+                // URL field — all except WhatsApp
                 if (!['WhatsApp'].contains(selectedApp))
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 4.0),
                     child: TextFormField(
                       controller: urlController,
+                      keyboardType: TextInputType.url,
+                      decoration: InputDecoration(
+                          labelText: selectedApp == 'Snapchat'
+                              ? 'Snapchat Username'
+                              : selectedApp == 'TikTok'
+                                  ? 'TikTok User ID'
+                                  : selectedApp == 'Instagram'
+                                      ? 'Source App URL'
+                                      : 'URL / Link',
+                          border: const OutlineInputBorder()),
+                    ),
+                  ),
+                // Article Title — LinkedIn only
+                if (['LinkedIn', 'All Apps'].contains(selectedApp))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 4.0),
+                    child: TextFormField(
+                      controller: titleController,
                       decoration: const InputDecoration(
-                          labelText: 'URL/Post/User ID',
+                          labelText: 'Article Title (LinkedIn)',
+                          border: OutlineInputBorder()),
+                    ),
+                  ),
+                // Hashtags — X/Twitter only
+                if (['X/Twitter', 'All Apps'].contains(selectedApp))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 4.0),
+                    child: TextFormField(
+                      controller: hashtagsController,
+                      decoration: const InputDecoration(
+                          labelText: 'Hashtags (X/Twitter, comma-separated)',
+                          hintText: 'flutter, opensource',
                           border: OutlineInputBorder()),
                     ),
                   ),
               ],
             ),
             const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _generateAndLaunch,
-                  icon: const Icon(Icons.open_in_new),
-                  label: const Text('Launch'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    final link = generators[selectedApp]!();
-                    _copyToClipboard(link);
-                  },
-                  icon: const Icon(Icons.copy),
-                  label: const Text('Copy'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    final link = generators[selectedApp]!();
-                    _showQRCode(link);
-                  },
-                  icon: const Icon(Icons.qr_code),
-                  label: const Text('QR'),
-                ),
-              ],
-            ),
+            if (selectedApp != 'All Apps')
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _generateAndLaunch,
+                    icon: const Icon(Icons.open_in_new),
+                    label: const Text('Launch'),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _shareLink(generators[selectedApp]!()),
+                    icon: const Icon(Icons.share),
+                    label: const Text('Share'),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () =>
+                        _copyToClipboard(generators[selectedApp]!()),
+                    icon: const Icon(Icons.copy),
+                    label: const Text('Copy'),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showQRCode(generators[selectedApp]!()),
+                    icon: const Icon(Icons.qr_code),
+                    label: const Text('QR'),
+                  ),
+                ],
+              ),
             const SizedBox(height: 32),
-            Text('Generated Link Preview:',
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            SelectableText(
-              generators[selectedApp]!(),
-              style: const TextStyle(
-                  color: Colors.blue, decoration: TextDecoration.underline),
-              textAlign: TextAlign.center,
-            ),
+            if (selectedApp == 'All Apps')
+              ..._buildAllAppsView()
+            else
+              ..._buildSingleAppView(),
           ],
         ),
       ),
