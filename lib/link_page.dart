@@ -74,7 +74,7 @@ class LinkGeneratorState extends State<LinkGenerator> {
     });
     // Auto-open the customize drawer on first render
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _scaffoldKey.currentState?.openEndDrawer();
+      if (mounted) _openDrawer();
     });
   }
 
@@ -110,7 +110,14 @@ class LinkGeneratorState extends State<LinkGenerator> {
     ));
   }
 
-  void _openDrawer() => _scaffoldKey.currentState?.openEndDrawer();
+  void _openDrawer() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _buildInputDrawer(),
+    );
+  }
 
   // ── Actions ────────────────────────────────────────────────────────────────
   void _copyLink(String link) {
@@ -387,101 +394,112 @@ class LinkGeneratorState extends State<LinkGenerator> {
         ]),
       );
 
-  // ── Customize drawer (input panel) ─────────────────────────────────────────
+  // ── Customize panel (input panel) ─────────────────────────────────────────
   Widget _buildInputDrawer() {
-    return Drawer(
-      width: 340,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Gradient header
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [kPrimary, kGradEnd],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+    return StatefulBuilder(builder: (context, setSheetState) {
+      return Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(
+          color: kSurface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Gradient header
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [kPrimary, kGradEnd],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
+              padding: const EdgeInsets.fromLTRB(20, 24, 12, 20),
+              child:
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('🎛️', style: TextStyle(fontSize: 28)),
+                        SizedBox(height: 10),
+                        Text('Customize',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700)),
+                        Text('Fill in your details',
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 13)),
+                      ]),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ]),
             ),
-            padding: const EdgeInsets.fromLTRB(20, 52, 12, 20),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Expanded(
+
+            // Scrollable inputs
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text('🎛️', style: TextStyle(fontSize: 28)),
-                      SizedBox(height: 10),
-                      Text('Customize',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700)),
-                      Text('Fill in your details',
-                          style:
-                              TextStyle(color: Colors.white70, fontSize: 13)),
+                      const SectionLabel('PLATFORM'),
+                      const SizedBox(height: 6),
+                      AppDropdown(
+                        platforms: kAllPlatforms,
+                        selected: _selected,
+                        onChanged: (p) {
+                          setSheetState(() => _selected = p!);
+                          setState(() {
+                            _selected = p!;
+                            _savePrefs();
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      const SectionLabel('DETAILS'),
+                      const SizedBox(height: 6),
+                      // Show all fields when "All Apps" is selected so each platform
+                      // can pick up what it needs. Individual platforms show their own fields.
+                      InputCard(
+                        platform: _selected.name == 'All Apps'
+                            ? kAllAppsPlatform
+                            : _selected,
+                        textCtrl: _textCtrl,
+                        phoneCtrl: _phoneCtrl,
+                        urlCtrl: _urlCtrl,
+                        titleCtrl: _titleCtrl,
+                        hashtagsCtrl: _hashtagsCtrl,
+                      ),
                     ]),
               ),
-              IconButton(
-                icon: const Icon(Icons.close, color: Colors.white),
+            ),
+
+            // Apply / Done button
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              child: FilledButton.icon(
                 onPressed: () => Navigator.pop(context),
-              ),
-            ]),
-          ),
-
-          // Scrollable inputs
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SectionLabel('PLATFORM'),
-                    const SizedBox(height: 6),
-                    AppDropdown(
-                      platforms: kAllPlatforms,
-                      selected: _selected,
-                      onChanged: (p) => setState(() {
-                        _selected = p!;
-                        _savePrefs();
-                      }),
-                    ),
-                    const SizedBox(height: 16),
-                    const SectionLabel('DETAILS'),
-                    const SizedBox(height: 6),
-                    // Show all fields when "All Apps" is selected so each platform
-                    // can pick up what it needs. Individual platforms show their own fields.
-                    InputCard(
-                      platform: _selected.name == 'All Apps'
-                          ? kAllAppsPlatform
-                          : _selected,
-                      textCtrl: _textCtrl,
-                      phoneCtrl: _phoneCtrl,
-                      urlCtrl: _urlCtrl,
-                      titleCtrl: _titleCtrl,
-                      hashtagsCtrl: _hashtagsCtrl,
-                    ),
-                  ]),
-            ),
-          ),
-
-          // Apply / Done button
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: FilledButton.icon(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.check_rounded),
-              label: const Text('Done'),
-              style: FilledButton.styleFrom(
-                backgroundColor: kPrimary,
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                icon: const Icon(Icons.check_rounded),
+                label: const Text('Done'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: kPrimary,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   // ── Build ──────────────────────────────────────────────────────────────────
@@ -496,7 +514,6 @@ class LinkGeneratorState extends State<LinkGenerator> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: kBg,
-      endDrawer: _buildInputDrawer(),
       appBar: AppBar(
         toolbarHeight: 62,
         flexibleSpace: Container(
@@ -630,15 +647,24 @@ class LinkGeneratorState extends State<LinkGenerator> {
                 SmallIconBtn(Icons.qr_code, 'QR', () => _showQRCode(link)),
               ]),
               const SizedBox(height: 10),
-              SelectableText(
-                link,
+              TextField(
+                controller: TextEditingController(text: link),
+                readOnly: true,
+                maxLines: null,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFFF6F5FF),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                ),
                 style: TextStyle(
                   color: p.color,
                   fontSize: 12,
-                  decoration: TextDecoration.underline,
-                  decorationColor: p.color,
                 ),
-                onTap: () => _launchLink(p.name),
               ),
             ]),
           ),

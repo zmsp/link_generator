@@ -268,16 +268,24 @@ class LinkPreviewCard extends StatelessWidget {
             _chip('Copy', Icons.copy, const Color(0xFFFF6B6B),
                 const Color(0x1AFF6B6B), onCopy),
           ]),
-          const SizedBox(height: 12),
-          SelectableText(
-            link,
+          TextField(
+            controller: TextEditingController(text: link),
+            readOnly: true,
+            maxLines: null,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFFF6F5FF),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            ),
             style: const TextStyle(
               color: kPrimary,
               fontSize: 13,
-              decoration: TextDecoration.underline,
-              decorationColor: kPrimary,
             ),
-            onTap: onLaunch,
           ),
         ]),
       );
