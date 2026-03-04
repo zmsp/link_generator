@@ -16,7 +16,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -31,12 +31,12 @@ class MyApp extends StatelessWidget {
 }
 
 class LinkGenerator extends StatefulWidget {
-  const LinkGenerator({Key? key}) : super(key: key);
+  const LinkGenerator({super.key});
   @override
-  _LinkGeneratorState createState() => _LinkGeneratorState();
+  LinkGeneratorState createState() => LinkGeneratorState();
 }
 
-class _LinkGeneratorState extends State<LinkGenerator> {
+class LinkGeneratorState extends State<LinkGenerator> {
   String selectedApp = 'WhatsApp';
 
   // Helper: returns icon + color for a given app name
@@ -248,6 +248,7 @@ class _LinkGeneratorState extends State<LinkGenerator> {
     try {
       await SharePlus.instance.share(ShareParams(text: link));
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Sharing not supported on this platform')),
       );
@@ -286,7 +287,7 @@ class _LinkGeneratorState extends State<LinkGenerator> {
   void _showQRCode(String link) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('QR Code'),
         content: SizedBox(
           width: 250,
@@ -311,7 +312,8 @@ class _LinkGeneratorState extends State<LinkGenerator> {
                   ),
                 );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                if (!dialogContext.mounted) return;
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
                   const SnackBar(content: Text('Failed to share QR code.')),
                 );
               }
@@ -324,11 +326,13 @@ class _LinkGeneratorState extends State<LinkGenerator> {
               try {
                 if (Platform.isAndroid || Platform.isIOS) {
                   var status = await Permission.storage.request();
+                  if (!dialogContext.mounted) return;
                   if (status.isGranted) {
                     final file = await _generateQRImageFile(link);
                     final result = await ImageGallerySaver.saveFile(file.path);
+                    if (!dialogContext.mounted) return;
                     if (result['isSuccess'] == true) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
                         const SnackBar(
                             content: Text('QR code saved to gallery!')),
                       );
@@ -336,14 +340,15 @@ class _LinkGeneratorState extends State<LinkGenerator> {
                       throw Exception('Save failed');
                     }
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
                       const SnackBar(
                           content: Text('Storage permission required.')),
                     );
                   }
                 }
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                if (!dialogContext.mounted) return;
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
                   const SnackBar(content: Text('Failed to save QR code.')),
                 );
               }
@@ -352,7 +357,7 @@ class _LinkGeneratorState extends State<LinkGenerator> {
             tooltip: 'Save',
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Close'),
           ),
         ],
@@ -367,15 +372,16 @@ class _LinkGeneratorState extends State<LinkGenerator> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('App not installed, use web fallback')),
       );
       // Fallback web logic
       String webUrl = '';
-      if (selectedApp == 'WhatsApp')
+      if (selectedApp == 'WhatsApp') {
         webUrl =
             'https://wa.me/${phoneController.text}?text=${Uri.encodeComponent(textController.text)}';
-      else if (selectedApp == 'Facebook') {
+      } else if (selectedApp == 'Facebook') {
         final quote = textController.text.isNotEmpty
             ? '&quote=${Uri.encodeComponent(textController.text)}'
             : '';
@@ -396,9 +402,10 @@ class _LinkGeneratorState extends State<LinkGenerator> {
             : '';
         webUrl =
             'https://www.linkedin.com/shareArticle?mini=true&url=${Uri.encodeComponent(urlController.text)}&summary=${Uri.encodeComponent(textController.text)}$title';
-      } else if (selectedApp == 'Telegram')
+      } else if (selectedApp == 'Telegram') {
         webUrl =
             'https://t.me/share/url?url=${Uri.encodeComponent(urlController.text)}&text=${Uri.encodeComponent(textController.text)}';
+      }
 
       if (webUrl.isNotEmpty) {
         final webUri = Uri.parse(webUrl);
