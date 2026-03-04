@@ -431,7 +431,9 @@ class LinkGeneratorState extends State<LinkGenerator> {
           // Scrollable inputs
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(
+                  16, 16, 16, 80), // More bottom padding for keyboard
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -460,6 +462,8 @@ class LinkGeneratorState extends State<LinkGenerator> {
                       titleCtrl: _titleCtrl,
                       hashtagsCtrl: _hashtagsCtrl,
                     ),
+                    const SizedBox(
+                        height: 40), // Extra space at bottom of inputs
                   ]),
             ),
           ),
