@@ -1,0 +1,14 @@
+title: Social Link Generator
+description: Generate social media profile links for Facebook, Twitter/X, LinkedIn, WhatsApp, Pinterest and more.
+baseurl: "/link_generator"
+url: "https://zmsp.github.io"
+
+theme: minima
+
+author:
+  name: zmsp
+  url: https://github.com/zmsp
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
