@@ -196,8 +196,6 @@ class UrlGenerator {
     required this.hashtags,
   });
 
-  // Helpers
-  String get _enc => Uri.encodeComponent; // shorthand
   String _e(String s) => Uri.encodeComponent(s);
   String _user(String s) => s.replaceAll('@', '');
 
@@ -285,8 +283,4 @@ class UrlGenerator {
         'Reddit' => 'reddit://submit?url=${_e(url)}&title=${_e(text)}',
         _ => '',
       };
-
-  // Ignore _enc — keep a non-getter shorthand without confusing Dart
-  // ignore: unused_element
-  static String Function(String) get _enc => Uri.encodeComponent;
 }
