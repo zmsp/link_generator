@@ -311,7 +311,7 @@ class LinkGeneratorState extends State<LinkGenerator> {
                     Navigator.pop(ctx);
                     widget.onToggleTheme();
                   },
-                  activeColor: Theme.of(context).colorScheme.primary,
+                  activeThumbColor: Theme.of(context).colorScheme.primary,
                 ),
               ]),
             ),
@@ -496,7 +496,7 @@ class LinkGeneratorState extends State<LinkGenerator> {
             const Row(mainAxisSize: MainAxisSize.min, children: [
               Text('🔗', style: TextStyle(fontSize: 18)),
               SizedBox(width: 6),
-              Text('Social Link Generator',
+              Text('Linkify',
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -533,17 +533,17 @@ class LinkGeneratorState extends State<LinkGenerator> {
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.edit_note),
-            label: 'Create',
+            label: 'Generate',
           ),
           NavigationDestination(
             icon: Icon(Icons.chat_outlined),
             selectedIcon: Icon(Icons.chat),
-            label: 'Chats',
+            label: 'Messages',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
-            label: 'Profiles',
+            label: 'Social',
           ),
         ],
       ),

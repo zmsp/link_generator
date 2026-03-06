@@ -19,9 +19,9 @@ jobs:
           client-payload: |
             {
               "source_repo": "${{ github.repository }}",
-              "target_repo": "zmsp/link_generator",
-              "site_url": "https://zmsp.github.io/link_generator/",
-              "base_href": "/link_generator/",
+              "target_repo": "zmsp/linkify",
+              "site_url": "https://linkify.shahadat.us",
+              "base_href": "/",
               "ref": "${{ github.ref }}",
               "sha": "${{ github.sha }}"
             }

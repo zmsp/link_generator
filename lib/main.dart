@@ -29,7 +29,7 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Social Link Generator',
+      title: 'Linkify',
       debugShowCheckedModeBanner: false,
       themeMode: _themeMode,
       theme: ThemeData(

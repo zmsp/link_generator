@@ -2,7 +2,7 @@
 layout: page
 title: Privacy Policy
 permalink: /privacy/
-description: Privacy Policy for the Social Link Generator app — learn how we collect and use data via Google Analytics.
+description: Privacy Policy for the Linkify app — learn how we collect and use data via Google Analytics.
 ---
 
 **Effective Date:** March 4, 2026
@@ -12,7 +12,7 @@ description: Privacy Policy for the Social Link Generator app — learn how we c
 
 ## 1. Introduction
 
-Welcome to **Social Link Generator** ("the App"), developed and maintained by the developer ("we", "us", or "our"). This Privacy Policy explains how we collect, use, and protect information when you use our mobile application available on Android and iOS.
+Welcome to **Linkify** ("the App"), developed and maintained by the developer ("we", "us", or "our"). This Privacy Policy explains how we collect, use, and protect information when you use our mobile application available on Android and iOS.
 
 By using the App, you agree to the collection and use of information as described in this policy.
 

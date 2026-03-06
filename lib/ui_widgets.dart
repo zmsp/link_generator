@@ -49,6 +49,7 @@ class AppDropdown extends StatelessWidget {
     required this.onChanged,
   });
 
+  @override
   Widget build(BuildContext context) => Container(
         decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,

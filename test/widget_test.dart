@@ -17,6 +17,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify that our app name shows up
-    expect(find.text('Deep Link Generator'), findsOneWidget);
+    expect(find.text('Linkify'), findsOneWidget);
   });
 }
