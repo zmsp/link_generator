@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'app_constants.dart';
 import 'custom_icons.dart';
 
 // ─── Field configuration ──────────────────────────────────────────────────────
@@ -12,9 +11,11 @@ class FieldConfig {
   final bool showUrl;
   final bool showTitle;
   final bool showHashtags;
+  final bool showUsername;
   final String textLabel;
   final String phoneLabel;
   final String urlLabel;
+  final String usernameLabel;
 
   const FieldConfig({
     this.showText = false,
@@ -22,9 +23,11 @@ class FieldConfig {
     this.showUrl = false,
     this.showTitle = false,
     this.showHashtags = false,
-    this.textLabel = 'Text / Message',
-    this.phoneLabel = 'Phone Number',
-    this.urlLabel = 'URL / Link',
+    this.showUsername = false,
+    this.textLabel = 'Message / Caption (WhatsApp, FB, X, etc.)',
+    this.phoneLabel = 'Phone Number (WhatsApp, Telegram)',
+    this.urlLabel = 'URL / Link (FB, LinkedIn, Reddit, etc.)',
+    this.usernameLabel = 'Username / Handle (Insta, TikTok, CashApp, etc.)',
   });
 }
 
@@ -76,8 +79,8 @@ final kPlatforms = <SocialPlatform>[
     icon: Icons.camera_alt,
     color: const Color(0xFFE1306C),
     fields: const FieldConfig(
-      showUrl: true,
-      urlLabel: 'Instagram Username',
+      showUsername: true,
+      usernameLabel: 'Instagram Handle',
     ),
   ),
   SocialPlatform(
@@ -109,8 +112,8 @@ final kPlatforms = <SocialPlatform>[
     icon: Icons.music_note,
     color: const Color(0xFF010101),
     fields: const FieldConfig(
-      showUrl: true,
-      urlLabel: 'TikTok Username',
+      showUsername: true,
+      usernameLabel: 'TikTok Username',
     ),
   ),
   SocialPlatform(
@@ -119,7 +122,9 @@ final kPlatforms = <SocialPlatform>[
     color: const Color(0xFF2AABEE),
     fields: const FieldConfig(
       showPhone: true,
-      phoneLabel: 'Username (or leave blank to share URL)',
+      phoneLabel: 'Phone Number',
+      showUsername: true,
+      usernameLabel: 'Telegram Username',
       showText: true,
       textLabel: 'Message',
       showUrl: true,
@@ -131,8 +136,8 @@ final kPlatforms = <SocialPlatform>[
     icon: Icons.chat_bubble_outline,
     color: const Color(0xFFFFB800),
     fields: const FieldConfig(
-      showUrl: true,
-      urlLabel: 'Snapchat Username',
+      showUsername: true,
+      usernameLabel: 'Snapchat Username',
     ),
   ),
   SocialPlatform(
@@ -147,6 +152,44 @@ final kPlatforms = <SocialPlatform>[
     ),
   ),
   SocialPlatform(
+    name: 'YouTube',
+    icon: Icons.play_circle_fill,
+    color: const Color(0xFFFF0000),
+    fields: const FieldConfig(
+      showUsername: true,
+      usernameLabel: 'Channel Handle (e.g. @user)',
+    ),
+  ),
+  SocialPlatform(
+    name: 'Twitch',
+    icon: Icons.live_tv,
+    color: const Color(0xFF9146FF),
+    fields: const FieldConfig(
+      showUsername: true,
+      usernameLabel: 'Twitch Username',
+    ),
+  ),
+  SocialPlatform(
+    name: 'Discord',
+    icon: Icons.forum, // Material doesn't have a native Discord icon yet
+    color: const Color(0xFF5865F2),
+    fields: const FieldConfig(
+      showUrl: true,
+      urlLabel: 'Invite Link or Code',
+      showUsername: true,
+      usernameLabel: 'User ID (e.g. 12345678)',
+    ),
+  ),
+  SocialPlatform(
+    name: 'GitHub',
+    icon: Icons.code,
+    color: const Color(0xFF181717),
+    fields: const FieldConfig(
+      showUsername: true,
+      usernameLabel: 'GitHub Username',
+    ),
+  ),
+  SocialPlatform(
     name: 'Reddit',
     icon: Icons.reddit,
     color: const Color(0xFFFF4500),
@@ -157,19 +200,65 @@ final kPlatforms = <SocialPlatform>[
       textLabel: 'Post Title',
     ),
   ),
+  SocialPlatform(
+    name: 'Venmo',
+    icon: Icons.payment,
+    color: const Color(0xFF008CFF),
+    fields: const FieldConfig(
+      showUsername: true,
+      usernameLabel: 'Venmo Username',
+    ),
+  ),
+  SocialPlatform(
+    name: 'Cash App',
+    icon: Icons.attach_money,
+    color: const Color(0xFF00D632),
+    fields: const FieldConfig(
+      showUsername: true,
+      usernameLabel: '\$Cashtag',
+    ),
+  ),
+  SocialPlatform(
+    name: 'PayPal',
+    icon: Icons.account_balance_wallet,
+    color: const Color(0xFF003087),
+    fields: const FieldConfig(
+      showUsername: true,
+      usernameLabel: 'PayPal Username',
+    ),
+  ),
+  SocialPlatform(
+    name: 'Spotify',
+    icon: Icons.library_music,
+    color: const Color(0xFF1DB954),
+    fields: const FieldConfig(
+      showUrl: true,
+      urlLabel: 'Spotify Link (Profile/Playlist)',
+    ),
+  ),
+  SocialPlatform(
+    name: 'Steam',
+    icon: Icons.videogame_asset,
+    color: const Color(0xFF171A21),
+    fields: const FieldConfig(
+      showUsername: true,
+      usernameLabel: 'Steam Friend Code / ID',
+    ),
+  ),
 ];
 
 // Sentinel used for "All Apps" dropdown entry
 final kAllAppsPlatform = SocialPlatform(
   name: 'All Apps',
   icon: Icons.apps,
-  color: kPrimary,
+  color: Colors.green,
   fields: const FieldConfig(
     showText: true,
     showPhone: true,
     showUrl: true,
     showTitle: true,
     showHashtags: true,
+    showUsername: true,
   ),
 );
 
@@ -187,6 +276,7 @@ class UrlGenerator {
   final String url;
   final String title;
   final String hashtags;
+  final String username;
 
   const UrlGenerator({
     required this.text,
@@ -194,6 +284,7 @@ class UrlGenerator {
     required this.url,
     required this.title,
     required this.hashtags,
+    required this.username,
   });
 
   String _e(String s) => Uri.encodeComponent(s);
@@ -214,7 +305,7 @@ class UrlGenerator {
 
       // Profile link only (no official share API)
       case 'Instagram':
-        final u = _user(url);
+        final u = _user(username);
         return u.isNotEmpty
             ? 'https://www.instagram.com/$u'
             : 'https://www.instagram.com';
@@ -235,25 +326,45 @@ class UrlGenerator {
 
       // Profile link only
       case 'TikTok':
-        final u = _user(url);
+        final u = _user(username);
         return u.isNotEmpty
             ? 'https://www.tiktok.com/@$u'
             : 'https://www.tiktok.com';
 
       // https://t.me/share/url?url={url}&text={text}  OR  https://t.me/{username}
       case 'Telegram':
-        if (phone.isNotEmpty && url.isEmpty) {
+        if (username.isNotEmpty && url.isEmpty) {
           final t = text.isNotEmpty ? '?text=${_e(text)}' : '';
-          return 'https://t.me/$phone$t';
+          return 'https://t.me/$username$t';
         }
         return 'https://t.me/share/url?url=${_e(url)}&text=${_e(text)}';
 
       // Profile link only
       case 'Snapchat':
-        final u = _user(url);
+        final u = _user(username);
         return u.isNotEmpty
             ? 'https://www.snapchat.com/add/$u'
             : 'https://www.snapchat.com';
+
+      case 'YouTube':
+        final u = _user(username);
+        if (u.isEmpty) return 'https://www.youtube.com';
+        return 'https://www.youtube.com/@$u';
+
+      case 'Twitch':
+        final u = _user(username);
+        if (u.isEmpty) return 'https://www.twitch.tv';
+        return 'https://www.twitch.tv/$u';
+
+      case 'Discord':
+        if (url.isNotEmpty) return url;
+        if (username.isNotEmpty) return 'https://discord.com/users/$username';
+        return 'https://discord.com';
+
+      case 'GitHub':
+        final u = _user(username);
+        if (u.isEmpty) return 'https://github.com';
+        return 'https://github.com/$u';
 
       // https://pinterest.com/pin/create/button/?url={url}&description={text}
       case 'Pinterest':
@@ -262,6 +373,30 @@ class UrlGenerator {
       // https://reddit.com/submit?url={url}&title={text}
       case 'Reddit':
         return 'https://reddit.com/submit?url=${_e(url)}&title=${_e(text)}';
+
+      case 'Venmo':
+        final u = _user(username);
+        return u.isNotEmpty ? 'https://venmo.com/u/$u' : 'https://venmo.com';
+
+      case 'Cash App':
+        final u = _user(username);
+        return u.isNotEmpty ? 'https://cash.app/\$$u' : 'https://cash.app';
+
+      case 'PayPal':
+        final u = _user(username);
+        return u.isNotEmpty ? 'https://paypal.me/$u' : 'https://paypal.com';
+
+      case 'Spotify':
+        return url.isNotEmpty ? url : 'https://open.spotify.com';
+
+      case 'Steam':
+        final u = _user(username);
+        // Steam has multiple formats, commonly /id/custom or /profiles/number.
+        // We will default to /id/ for handles, but typically people use Friend Codes now.
+        // It's just a best-effort simple link.
+        return u.isNotEmpty
+            ? 'https://steamcommunity.com/id/$u'
+            : 'https://steamcommunity.com';
 
       default:
         return '';
@@ -272,15 +407,24 @@ class UrlGenerator {
   String deepLink(String name) => switch (name) {
         'WhatsApp' => 'whatsapp://send?phone=$phone&text=${_e(text)}',
         'Facebook' => 'fb://facewebmodal/f?href=${_e(url)}',
-        'Instagram' => 'instagram://user?username=${_user(url)}',
+        'Instagram' => 'instagram://user?username=${_user(username)}',
         'LinkedIn' => 'linkedin://shareArticle?mini=true&url=${_e(url)}',
         'X/Twitter' => 'twitter://post?message=${_e(text)}',
-        'TikTok' => 'tiktok://user?user_id=${_user(url)}',
-        'Telegram' => 'tg://resolve?domain=$phone&text=${_e(text)}',
-        'Snapchat' => 'snapchat://add/${_user(url)}',
+        'TikTok' => 'tiktok://user?user_id=${_user(username)}',
+        'Telegram' => 'tg://resolve?domain=$username&text=${_e(text)}',
+        'Snapchat' => 'snapchat://add/${_user(username)}',
+        'YouTube' => 'vnd.youtube://www.youtube.com/@${_user(username)}',
+        'Twitch' => 'twitch://stream/${_user(username)}',
+        'Discord' => url.isNotEmpty ? url : '',
+        'GitHub' => '',
         'Pinterest' =>
           'pinterest://pin/create/button/?url=${_e(url)}&description=${_e(text)}',
         'Reddit' => 'reddit://submit?url=${_e(url)}&title=${_e(text)}',
+        'Venmo' => 'venmo://users/${_user(username)}',
+        'Cash App' => 'cashme://\$${_user(username)}',
+        'PayPal' => 'paypal://paypal.me/${_user(username)}',
+        'Spotify' => url.isNotEmpty ? url : '',
+        'Steam' => 'steam://url/SteamIDPage/${_user(username)}',
         _ => '',
       };
 }

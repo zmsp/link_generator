@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'app_constants.dart';
 import 'platform_data.dart';
 
-// ─── Section label ────────────────────────────────────────────────────────────
 class SectionLabel extends StatelessWidget {
   final String label;
   const SectionLabel(this.label, {super.key});
@@ -51,17 +49,17 @@ class AppDropdown extends StatelessWidget {
     required this.onChanged,
   });
 
-  @override
   Widget build(BuildContext context) => Container(
         decoration: BoxDecoration(
-            color: kSurface, borderRadius: BorderRadius.circular(18)),
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(18)),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<SocialPlatform>(
             value: selected,
             isExpanded: true,
-            icon:
-                const Icon(Icons.keyboard_arrow_down_rounded, color: kPrimary),
+            icon: Icon(Icons.keyboard_arrow_down_rounded,
+                color: Theme.of(context).colorScheme.primary),
             items: platforms.map((p) {
               return DropdownMenuItem(
                 value: p,
@@ -95,6 +93,7 @@ class InputCard extends StatelessWidget {
   final TextEditingController urlCtrl;
   final TextEditingController titleCtrl;
   final TextEditingController hashtagsCtrl;
+  final TextEditingController usernameCtrl;
 
   const InputCard({
     super.key,
@@ -104,59 +103,87 @@ class InputCard extends StatelessWidget {
     required this.urlCtrl,
     required this.titleCtrl,
     required this.hashtagsCtrl,
+    required this.usernameCtrl,
   });
 
-  static const _fill = Color(0xFFF6F5FF);
-  static const _border =
-      OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)));
-  static const _eBorder = OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(12)),
-    borderSide: BorderSide(color: Color(0xFFE0DEFF)),
-  );
-
   Widget _field(
+    BuildContext context,
     TextEditingController ctrl,
     String label, {
     IconData? prefix,
     int maxLines = 1,
     TextInputType? kbd,
-  }) =>
-      Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: TextField(
-          controller: ctrl,
-          maxLines: maxLines,
-          keyboardType: kbd,
-          decoration: InputDecoration(
-            labelText: label,
-            filled: true,
-            fillColor: _fill,
-            border: _border,
-            enabledBorder: _eBorder,
-            prefixIcon: prefix != null ? Icon(prefix, size: 20) : null,
-          ),
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fill = isDark ? const Color(0xFF2C3E50) : Colors.white;
+    final border = OutlineInputBorder(
+      borderRadius: const BorderRadius.all(Radius.circular(12)),
+      borderSide:
+          BorderSide(color: isDark ? Colors.transparent : Colors.grey.shade300),
+    );
+    final errorBorder = OutlineInputBorder(
+      borderRadius: const BorderRadius.all(Radius.circular(12)),
+      borderSide: const BorderSide(color: Colors.red),
+    );
+    final focusBorder = OutlineInputBorder(
+      borderRadius: const BorderRadius.all(Radius.circular(12)),
+      borderSide:
+          BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+    );
+
+    final textStyle = TextStyle(color: isDark ? Colors.white : Colors.black87);
+    final labelStyle =
+        TextStyle(color: isDark ? Colors.white70 : Colors.black54);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextField(
+        controller: ctrl,
+        maxLines: maxLines,
+        keyboardType: kbd,
+        style: textStyle,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: labelStyle,
+          filled: true,
+          fillColor: fill,
+          border: border,
+          enabledBorder: border,
+          focusedBorder: focusBorder,
+          errorBorder: errorBorder,
+          prefixIcon: prefix != null
+              ? Icon(prefix,
+                  size: 20, color: isDark ? Colors.white54 : Colors.black54)
+              : null,
         ),
-      );
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final f = platform.fields;
     return Container(
       decoration: BoxDecoration(
-          color: kSurface, borderRadius: BorderRadius.circular(18)),
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(18)),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (f.showText) _field(textCtrl, f.textLabel, maxLines: 3),
+        if (f.showUsername)
+          _field(context, usernameCtrl, f.usernameLabel,
+              prefix: Icons.person_outline),
+        if (f.showText) _field(context, textCtrl, f.textLabel, maxLines: 3),
         if (f.showPhone)
-          _field(phoneCtrl, f.phoneLabel,
+          _field(context, phoneCtrl, f.phoneLabel,
               prefix: Icons.phone_outlined, kbd: TextInputType.phone),
         if (f.showUrl)
-          _field(urlCtrl, f.urlLabel,
+          _field(context, urlCtrl, f.urlLabel,
               prefix: Icons.link_outlined, kbd: TextInputType.url),
         if (f.showTitle)
-          _field(titleCtrl, 'Article Title', prefix: Icons.title),
+          _field(context, titleCtrl, 'Article Title', prefix: Icons.title),
         if (f.showHashtags)
-          _field(hashtagsCtrl, 'Hashtags (comma-separated, no #)',
+          _field(context, hashtagsCtrl, 'Hashtags (comma-separated, no #)',
               prefix: Icons.tag),
       ]),
     );
@@ -244,51 +271,57 @@ class LinkPreviewCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Container(
-        decoration: BoxDecoration(
-          color: kSurface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: kPrimary.withValues(alpha: 0.25)),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            const Icon(Icons.link, size: 15, color: kPrimary),
-            const SizedBox(width: 6),
-            const Text('Generated Link',
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: kPrimary,
-                    letterSpacing: 0.5)),
-            const Spacer(),
-            _chip('Open', Icons.open_in_new, kPrimary, const Color(0x1A6C63FF),
-                onLaunch),
-            const SizedBox(width: 8),
-            _chip('Copy', Icons.copy, const Color(0xFFFF6B6B),
-                const Color(0x1AFF6B6B), onCopy),
-          ]),
-          TextField(
-            controller: TextEditingController(text: link),
-            readOnly: true,
-            maxLines: null,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFFF6F5FF),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            ),
-            style: const TextStyle(
-              color: kPrimary,
-              fontSize: 13,
-            ),
-          ),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: 0.25)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(Icons.link, size: 15, color: theme.colorScheme.primary),
+          const SizedBox(width: 6),
+          Text('Generated Link',
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.primary,
+                  letterSpacing: 0.5)),
+          const Spacer(),
+          _chip('Open', Icons.open_in_new, theme.colorScheme.primary,
+              const Color(0x1A6C63FF), onLaunch),
+          const SizedBox(width: 8),
+          _chip('Copy', Icons.copy, const Color(0xFFFF6B6B),
+              const Color(0x1AFF6B6B), onCopy),
         ]),
-      );
+        TextField(
+          controller: TextEditingController(text: link),
+          readOnly: true,
+          maxLines: null,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor:
+                isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF6F5FF),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          ),
+          style: TextStyle(
+            color: theme.colorScheme.primary,
+            fontSize: 13,
+          ),
+        ),
+      ]),
+    );
+  }
 
   Widget _chip(String label, IconData icon, Color fg, Color bg,
           VoidCallback onTap) =>
