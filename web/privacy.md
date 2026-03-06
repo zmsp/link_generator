@@ -2,123 +2,54 @@
 layout: page
 title: Privacy Policy
 permalink: /privacy/
-description: Privacy Policy for the Linkify app — learn how we collect and use data via Google Analytics.
+description: Privacy Policy for the Linkify app — learn how we collect and use data.
 ---
 
-**Effective Date:** March 4, 2026
-**Last Updated:** March 4, 2026
+# Privacy Policy for Linkify
 
----
+## Overview
+Linkify is committed to "High Integrity Privacy." We respect your privacy and are dedicated to protecting any personal information that may be involved during your use of the app. This policy explains our approach to data collection, usage, and local storage. By using the App, you agree to the terms of this Privacy Policy.
 
-## 1. Introduction
+## Information Collection and Local Storage
+All the data you enter to generate social media links (e.g., usernames, phone numbers, custom messages) is processed and stored strictly locally on your device.
+- We do not collect, transmit, or store any of your generated links or personal data on external servers.
+- The data may be temporarily stored using local device storage (`shared_preferences`) solely to remember your inputs between sessions and remains entirely under your control.
 
-Welcome to **Linkify** ("the App"), developed and maintained by the developer ("we", "us", or "our"). This Privacy Policy explains how we collect, use, and protect information when you use our mobile application available on Android and iOS.
+## Third-Party Store Information
+We do receive certain non-personal information from the Google Play Store and Apple App Store, including:
+- Download metrics and installation statistics.
+- Ratings and written reviews.
+- Anonymized crash reports (to help us identify and fix technical issues).
+We use this information solely to improve the app’s performance and respond to user feedback.
 
-By using the App, you agree to the collection and use of information as described in this policy.
+## Analytics and Tracking
+To understand how our app is used and to improve the user experience, we utilize Google Analytics for Firebase.
+- What we collect: Google Analytics collects non-personal, anonymized data related to app usage, such as screens visited, session duration, and general interaction patterns.
+- What we DO NOT collect: We explicitly do not use Analytics to collect any personal identifying information, your generated social links, or any other sensitive user-generated content. All such data remains strictly local to your device.
+- Purpose: The data collected via Analytics is used solely for internal analysis to enhance the app's performance, identify areas for bug fixes, and optimize the interface.
 
----
+## Use of Information
+The local data on your device is used strictly for the app’s functionality (generating URLs and QR codes). Information received from app stores and anonymous analytics data collected via Google Analytics are used to improve the overall user experience and ensure platform stability.
 
-## 2. Information We Collect
+## Disclosure of Information
+We do not disclose your information to third parties. We do not sell or trade any data. Information is only disclosed if required by law or to protect our legal rights.
 
-### 2.1 Analytics Data (Google Analytics / Firebase Analytics)
+## Data Retention and Deletion
+- User Data: Since your generated links and inputs are stored locally, deleting the Linkify app from your device will permanently remove all saved information.
+- Store Data / Analytics: We do not retain personal identifiers from store-provided metrics or Google Analytics.
 
-We use **Google Analytics for Firebase** to collect anonymized usage data to help us understand how users interact with the App and to improve the user experience. This may include:
+## Permissions
+- Internet Access: Required for generating dynamic web links, sharing, and loading analytics.
+- Storage/Files: Required to persist your inputs across app sessions and to save generated QR codes to your device gallery.
 
-- **Device information** — device type, operating system version, app version
-- **Usage data** — screens visited, features used, session duration, button taps
-- **Crash reports** — error logs and crash diagnostics
-- **General location data** — country or region level only (not precise location)
+## Security
+We employ modern development practices to ensure your data is handled securely. However, please remember that no method of electronic storage is 100% secure, and we recommend using device-level security (passcodes/biometrics) to protect your hardware.
 
-This data is collected automatically when you use the App. It is aggregated and anonymized, and it **cannot be used to personally identify you**.
+## Children’s Privacy
+Linkify is not intended for children under the age of 13. We do not knowingly collect or solicit personal information from children. If you are under 13, please do not use the app.
 
-Google Analytics data is processed by Google LLC in accordance with [Google's Privacy Policy](https://policies.google.com/privacy).
+## Changes to This Policy
+We reserve the right to modify this Privacy Policy to reflect changes in our practices or for legal reasons. Updates will be indicated by a new version number or date at the top of the policy.
 
-### 2.2 Data You Enter
-
-The App allows you to type profile names or usernames to generate social media links (e.g., for Facebook, Twitter/X, LinkedIn, WhatsApp, Pinterest). This data:
-
-- Is **processed locally** on your device
-- Is **not transmitted to our servers**
-- May be stored locally on your device using your phone's storage (e.g., shared preferences) solely to remember your inputs between sessions
-
-### 2.3 Data We Do NOT Collect
-
-We do **not** collect:
-
-- Your name, email address, or contact information
-- Precise GPS or location data
-- Payment information
-- Social media credentials or passwords
-
----
-
-## 3. How We Use Collected Data
-
-We use the analytics data we collect to:
-
-- Understand which features are most used
-- Diagnose bugs and crashes
-- Improve performance and user experience
-- Make informed decisions about future updates
-
----
-
-## 4. Third-Party Services
-
-The App uses the following third-party services that may collect data per their own privacy policies:
-
-| Service | Purpose | Privacy Policy |
-|---|---|---|
-| Google Analytics for Firebase | App usage analytics | [View Policy](https://policies.google.com/privacy) |
-| Google Play Services | App distribution (Android) | [View Policy](https://policies.google.com/privacy) |
-| Apple App Store Services | App distribution (iOS) | [View Policy](https://www.apple.com/legal/privacy/) |
-
----
-
-## 5. Data Retention
-
-Analytics data collected via Google Analytics is retained according to Google's own data retention settings (typically 2–14 months). Locally stored data (e.g., your saved usernames) remains on your device until you uninstall the App or clear the App's data.
-
----
-
-## 6. Children's Privacy
-
-This App is **not directed to children under the age of 13**. We do not knowingly collect personal information from children. If you believe a child has provided us with personal data, please contact us and we will take steps to delete such information.
-
----
-
-## 7. Your Rights
-
-Depending on your location, you may have rights regarding your data, including:
-
-- **Right to access** — Request information about what data we hold
-- **Right to deletion** — Request deletion of your data
-- **Right to opt out of analytics** — You can limit ad tracking and analytics through your device settings:
-  - **Android:** *Settings → Google → Ads → Opt out of Ads Personalization*
-  - **iOS:** *Settings → Privacy & Security → Tracking → Disable*
-
----
-
-## 8. Security
-
-We take reasonable technical measures to protect your data. However, no method of transmission or electronic storage is 100% secure. Data collected via Google Analytics is protected by Google's enterprise-grade security infrastructure.
-
----
-
-## 9. Changes to This Policy
-
-We may update this Privacy Policy from time to time. When we do, we will update the **"Last Updated"** date at the top of this page. We encourage you to review this policy periodically. Continued use of the App after changes constitutes acceptance of the updated policy.
-
----
-
-## 10. Contact Us
-
-If you have any questions or concerns about this Privacy Policy, please contact us at:
-
-**Developer:** zmsp  
-**GitHub:** [github.com/zmsp](https://github.com/zmsp)  
-**App Repository:** [github.com/zmsp/link_generator](https://github.com/zmsp/link_generator)
-
----
-
-*This privacy policy was last updated on March 4, 2026.*
+## Contact Us
+If you have any questions regarding this Privacy Policy or our high-integrity data practices, please get in touch with us via our GitHub repository: [github.com/zmsp/link_generator](https://github.com/zmsp/link_generator).
